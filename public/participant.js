@@ -80,6 +80,32 @@ function initParticipantLogic() {
     return new Date(ts).toLocaleTimeString();
   }
 
+  function playCyberBuzzerSound() {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+
+      // Cyber style sweep sound
+      oscillator.type = 'square';
+      oscillator.frequency.setValueAtTime(150, audioCtx.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
+      oscillator.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.3);
+
+      gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + 0.4);
+    } catch (e) {
+      console.warn("Audio playback failed:", e);
+    }
+  }
+
+
   // ---------- Load Saved Name ----------
   const savedName = localStorage.getItem("quizParticipantName");
   if (savedName) {
@@ -185,6 +211,7 @@ function initParticipantLogic() {
       return current;
     }).then((res) => {
       if (res.committed) {
+        playCyberBuzzerSound();
         update(stateRef, { buzzerEnabled: false });
         setStatusPill("winner", "You are first!");
       } else {

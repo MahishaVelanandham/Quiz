@@ -41,6 +41,31 @@ function formatTime(ts) {
   return new Date(ts).toLocaleTimeString();
 }
 
+function playCyberBuzzerSound() {
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+
+    oscillator.type = 'square';
+    oscillator.frequency.setValueAtTime(150, audioCtx.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
+    oscillator.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.3);
+
+    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    oscillator.start();
+    oscillator.stop(audioCtx.currentTime + 0.4);
+  } catch (e) {
+    console.warn("Audio playback failed:", e);
+  }
+}
+
+
 /* ---------------- Auth ---------------- */
 
 signInAnonymously(auth);
@@ -48,10 +73,17 @@ signInAnonymously(auth);
 /* ---------------- Quiz State ---------------- */
 
 const stateRef = ref(db, "quizState");
+let lastWinner = null;
 
 onValue(stateRef, (snap) => {
   const state = snap.val() || {};
   const { buzzerEnabled = false, winner = null } = state;
+
+  if (winner && !lastWinner) {
+    playCyberBuzzerSound();
+  }
+  lastWinner = winner;
+
 
   buzzerStateLabel.textContent = buzzerEnabled ? "Enabled" : "Disabled";
 
