@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Quiz Buzzer – Participant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="app-header">
+        <div class="app-title-block">
+          <div class="app-title">
+            <svg style="width:24px; height:24px; color:#f97316;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            Live Quiz Buzzer
+          </div>
+          <div class="app-subtitle">Participant Console</div>
+        </div>
+        <div id="status-pill" class="status-pill status-pill--waiting">
+          <span class="status-dot"></span>
+          <span id="status-pill-text">Waiting for host</span>
+        </div>
+      </header>
+
+      <section class="card-section">
+        <div class="section-title">Your Details</div>
+        <div class="section-body">
+          <div class="form-row">
+            <label for="nameInput" class="label">Participant name</label>
+            <div class="input-shell">
+              <input
+                id="nameInput"
+                type="text"
+                placeholder="Enter your display name"
+                autocomplete="off"
+              />
+              <span class="input-chip">Required</span>
+            </div>
+          </div>
+          <button id="saveNameBtn" class="btn btn-muted" type="button">
+            Save Name
+          </button>
+          <p class="helper-text" id="nameHint">
+            This name will appear on the host screen if you win the buzzer.
+          </p>
+        </div>
+      </section>
+
+      <section class="card-section">
+        <div class="section-title">Buzzer</div>
+        <div class="section-body buzzer-shell">
+          <button
+            id="buzzerBtn"
+            class="buzzer-button"
+            type="button"
+            disabled
+          >
+            BUZZ
+          </button>
+          <p class="helper-text" id="buzzerHelper">
+            Waiting for host to enable the buzzer.
+          </p>
+        </div>
+      </section>
+
+      <section class="card-section">
+        <div class="section-title">Round Status</div>
+        <div class="section-body">
+          <div class="meta-grid">
+            <div class="meta-item">
+              <div class="meta-label">You</div>
+              <div class="meta-value" id="youStatus">Not joined</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Winner</div>
+              <div class="meta-value" id="winnerSummary">
+                —
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="app-footer">
+        <span>Connected via Firebase Realtime Database</span>
+        <span>Participant</span>
+      </footer>
+    </main>
+
+    <script type="module" src="participant.js"></script>
+  </body>
+</html>

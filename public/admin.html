@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Quiz Buzzer – Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <main class="app-shell">
+
+    <!-- HEADER -->
+    <header class="app-header">
+      <div class="app-title-block">
+        <div class="app-title">
+          <svg style="width:24px; height:24px; color:#f97316;" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+          Live Quiz Buzzer
+        </div>
+        <div class="app-subtitle">Host / Admin Console</div>
+      </div>
+
+      <div id="adminStatusPill" class="status-pill status-pill--waiting">
+        <span class="status-dot"></span>
+        <span id="adminStatusText">Buzzer disabled</span>
+      </div>
+    </header>
+
+    <!-- ROUND CONTROLS -->
+    <section class="card-section">
+      <div class="section-title">Round Controls</div>
+      <div class="section-body">
+        <div class="admin-actions">
+          <button id="enableBtn" class="btn btn-primary">Enable Buzzer</button>
+          <button id="disableBtn" class="btn btn-muted">Disable</button>
+          <button id="resetBtn" class="btn btn-danger">Reset Round</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- CURRENT ROUND STATUS -->
+    <section class="card-section">
+      <div class="section-title">Current Round Status</div>
+      <div class="section-body">
+        <div class="meta-grid">
+          <div class="meta-item">
+            <div class="meta-label">Buzzer state</div>
+            <div class="meta-value" id="buzzerStateLabel">Disabled</div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-label">Winner</div>
+            <div class="meta-value" id="adminWinnerName">—</div>
+          </div>
+        </div>
+
+        <div class="meta-grid" style="margin-top:6px;">
+          <div class="meta-item">
+            <div class="meta-label">Winner pressed at</div>
+            <div class="meta-value" id="adminWinnerTime">—</div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-label">Notes</div>
+            <div class="meta-value" id="adminNotes">
+              Enable buzzer to start a round.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCOREBOARD -->
+    <section class="card-section">
+      <div class="section-title">Scoreboard</div>
+      <div class="section-body">
+
+        <div style="max-height:260px; overflow:auto;">
+          <table style="width:100%; border-collapse:collapse;">
+            <thead>
+              <tr>
+                <th style="text-align:left;">Participant</th>
+                <th style="text-align:right;">Score</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="scoresBody">
+              <!-- Filled by admin.js -->
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </section>
+
+    <footer class="app-footer">
+      <span>Firebase Realtime Database</span>
+      <span>Admin</span>
+    </footer>
+
+  </main>
+
+  <script type="module" src="admin.js"></script>
+</body>
+
+</html>
