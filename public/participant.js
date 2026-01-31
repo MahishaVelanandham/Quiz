@@ -37,14 +37,18 @@ function showParticipantError(title, message, code) {
   `;
 }
 
+let isInitialized = false;
+
 signInAnonymously(auth)
   .then(() => {
-    // Test DB
+    // Health Monitoring
     const connectedRef = ref(db, ".info/connected");
     onValue(connectedRef, (snap) => {
-      if (snap.val() === true) {
+      const isConnected = snap.val() === true;
+      if (isConnected && !isInitialized) {
+        isInitialized = true;
         initParticipantLogic();
-      } else {
+      } else if (!isConnected && !isInitialized) {
         showParticipantError("Server Unreachable", "Connected to Auth, but cannot reach Database. Check rules.", "db/offline");
       }
     }, (err) => {

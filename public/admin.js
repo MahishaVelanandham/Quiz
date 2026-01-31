@@ -42,22 +42,29 @@ function showConnectionError(title, message, code) {
   `;
 }
 
-// 1. Authenticate
+// 1. Authenticate & Connect
+let isInitialized = false;
+
 signInAnonymously(auth)
   .then(() => {
-    // 2. Test Database Access
-    const testRef = ref(db, ".info/connected");
-    onValue(testRef, (snap) => {
-      if (snap.val() === true) {
+    // 2. Health Monitoring
+    const connectedRef = ref(db, ".info/connected");
+    onValue(connectedRef, (snap) => {
+      const isConnected = snap.val() === true;
+
+      if (isConnected && !isInitialized) {
+        isInitialized = true;
         if (adminNotes) {
           adminNotes.innerHTML = '<span style="color: #22c55e; font-weight: 600; display: flex; align-items: center; gap: 6px;"><svg style="width:16px; height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Backend Connected</span>';
         }
         initAdminLogic();
-      } else {
-        showConnectionError("Database Unreachable", "Auth passed, but cannot reach the Database. Check your internet or Firebase Realtime Database setup.", "db/offline");
+      } else if (!isConnected && isInitialized) {
+        console.warn("Lost connection to Firebase database. Retrying...");
+      } else if (!isConnected && !isInitialized) {
+        showConnectionError("Database Unreachable", "Auth passed, but cannot reach the Database. Check your internet or Firebase setup.", "db/offline");
       }
     }, (err) => {
-      showConnectionError("Permission Denied", "Database Rules are blocking access. Set '.read' and '.write' to 'true' in Firebase Console.", "db/forbidden");
+      showConnectionError("Permission Denied", "Database Rules are blocking access. Set '.read' and '.write' to 'true' in Firebase.", "db/forbidden");
     });
   })
   .catch((error) => {
