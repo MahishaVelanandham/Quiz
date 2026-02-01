@@ -122,22 +122,33 @@ onValue(stateRef, (snap) => {
 
 /* ---------------- Admin Buttons ---------------- */
 
-enableBtn.onclick = () =>
-  update(stateRef, {
-    buzzerEnabled: true,
-    winner: null,
-    runnerUp: null
-  });
+enableBtn.onclick = async () => {
+  try {
+    await set(stateRef, {
+      buzzerEnabled: true,
+      winner: null,
+      runnerUp: null
+    });
+  } catch (err) {
+    console.error("Enable fail:", err);
+  }
+};
 
 disableBtn.onclick = () =>
   update(stateRef, { buzzerEnabled: false });
 
-resetBtn.onclick = () =>
-  set(stateRef, {
-    buzzerEnabled: false,
-    winner: null,
-    runnerUp: null
-  });
+resetBtn.onclick = async () => {
+  try {
+    await set(stateRef, {
+      buzzerEnabled: false,
+      winner: null,
+      runnerUp: null
+    });
+  } catch (err) {
+    console.error("Reset fail:", err);
+  }
+};
+
 
 /* ---------------- Scoreboard ---------------- */
 
