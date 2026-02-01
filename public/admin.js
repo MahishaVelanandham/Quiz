@@ -17,24 +17,24 @@ import {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
+signInAnonymously(auth);
 
 /* ---------------- DOM ---------------- */
 
 const enableBtn = document.getElementById("enableBtn");
 const disableBtn = document.getElementById("disableBtn");
 const resetBtn = document.getElementById("resetBtn");
+
 const buzzerStateLabel = document.getElementById("buzzerStateLabel");
 const adminWinnerName = document.getElementById("adminWinnerName");
+const adminSecondName = document.getElementById("adminSecondName");
 const adminWinnerTime = document.getElementById("adminWinnerTime");
+const adminSecondTime = document.getElementById("adminSecondTime");
 const adminStatusText = document.getElementById("adminStatusText");
 const adminStatusPill = document.getElementById("adminStatusPill");
 const scoresBody = document.getElementById("scoresBody");
 
 /* ---------------- Helpers ---------------- */
-
-function encodeKey(name) {
-  return name.trim().replace(/[.#$/\[\]\s]/g, "_");
-}
 
 function formatTime(ts) {
   if (!ts) return "—";
@@ -43,78 +43,101 @@ function formatTime(ts) {
 
 function playCyberBuzzerSound() {
   try {
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
 
-    oscillator.type = 'square';
-    oscillator.frequency.setValueAtTime(150, audioCtx.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
-    oscillator.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.3);
+    osc.type = "square";
+    osc.frequency.setValueAtTime(160, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(900, ctx.currentTime + 0.12);
 
-    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
 
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
 
-    oscillator.start();
-    oscillator.stop(audioCtx.currentTime + 0.4);
-  } catch (e) {
-    console.warn("Audio playback failed:", e);
-  }
+    osc.start();
+    osc.stop(ctx.currentTime + 0.35);
+  } catch { }
 }
-
-
-/* ---------------- Auth ---------------- */
-
-signInAnonymously(auth);
 
 /* ---------------- Quiz State ---------------- */
 
 const stateRef = ref(db, "quizState");
 let lastWinner = null;
+let lastRunnerUp = null;
 
 onValue(stateRef, (snap) => {
   const state = snap.val() || {};
-  const { buzzerEnabled = false, winner = null } = state;
+  const { buzzerEnabled = false, winner = null, runnerUp = null } = state;
 
-  if (winner && !lastWinner) {
+  // Play sound ONLY when new slot is filled
+  if (
+    (winner && !lastWinner) ||
+    (runnerUp && !lastRunnerUp)
+  ) {
     playCyberBuzzerSound();
   }
-  lastWinner = winner;
 
+  lastWinner = winner;
+  lastRunnerUp = runnerUp;
 
   buzzerStateLabel.textContent = buzzerEnabled ? "Enabled" : "Disabled";
 
   if (winner) {
     adminWinnerName.textContent = winner.name;
+    adminWinnerName.style.color = "var(--success)";
     adminWinnerTime.textContent = formatTime(winner.pressedAt);
-    adminStatusText.textContent = "Winner Locked";
-    adminStatusPill.className = "status-pill status-pill--winner";
+
+    if (runnerUp) {
+      adminStatusText.textContent = "Winner & Runner-Up Selected";
+      adminStatusPill.className = "status-pill status-pill--winner";
+    } else {
+      adminStatusText.textContent = "Winner Selected – Waiting for Runner-Up";
+      adminStatusPill.className = "status-pill status-pill--active";
+    }
   } else {
     adminWinnerName.textContent = "—";
     adminWinnerTime.textContent = "—";
-    adminStatusText.textContent = buzzerEnabled ? "Buzzer Live" : "Waiting";
+    adminStatusText.textContent =
+      buzzerEnabled ? "Waiting for Buzz…" : "Buzzer Disabled";
     adminStatusPill.className =
-      "status-pill " +
-      (buzzerEnabled ? "status-pill--active" : "status-pill--waiting");
+      "status-pill " + (buzzerEnabled ? "status-pill--active" : "status-pill--waiting");
+  }
+
+  if (runnerUp) {
+    adminSecondName.textContent = runnerUp.name;
+    adminSecondTime.textContent = formatTime(runnerUp.pressedAt);
+  } else {
+    adminSecondName.textContent = "—";
+    adminSecondTime.textContent = "—";
   }
 
   enableBtn.disabled = buzzerEnabled;
+
+
   disableBtn.disabled = !buzzerEnabled;
 });
 
 /* ---------------- Admin Buttons ---------------- */
 
 enableBtn.onclick = () =>
-  update(stateRef, { buzzerEnabled: true, winner: null });
+  update(stateRef, {
+    buzzerEnabled: true,
+    winner: null,
+    runnerUp: null
+  });
 
 disableBtn.onclick = () =>
   update(stateRef, { buzzerEnabled: false });
 
 resetBtn.onclick = () =>
-  set(stateRef, { buzzerEnabled: false, winner: null });
+  set(stateRef, {
+    buzzerEnabled: false,
+    winner: null,
+    runnerUp: null
+  });
 
 /* ---------------- Scoreboard ---------------- */
 
@@ -149,26 +172,23 @@ onValue(scoresRef, (snap) => {
 /* ---------------- Score Actions ---------------- */
 
 scoresBody.addEventListener("click", (e) => {
-  const add = e.target.dataset.add;
-  const reset = e.target.dataset.reset;
-  const del = e.target.dataset.delete;
+  const btn = e.target;
+  const key = btn.dataset.key;
 
-  if (add) {
-    const refScore = ref(db, `scores/${add ? e.target.dataset.key : ""}/score`);
+  if (btn.dataset.add) {
+    runTransaction(
+      ref(db, `scores/${key}/score`),
+      cur => (cur || 0) + Number(btn.dataset.add)
+    );
   }
 
-  if (add) {
-    const key = e.target.dataset.key;
-    runTransaction(ref(db, `scores/${key}/score`), cur => (cur || 0) + Number(add));
+  if (btn.dataset.reset) {
+    update(ref(db, `scores/${btn.dataset.reset}`), { score: 0 });
   }
 
-  if (reset) {
-    update(ref(db, `scores/${reset}`), { score: 0 });
-  }
-
-  if (del) {
+  if (btn.dataset.delete) {
     if (confirm("Delete this participant?")) {
-      remove(ref(db, `scores/${del}`));
+      remove(ref(db, `scores/${btn.dataset.delete}`));
     }
   }
 });

@@ -5,8 +5,11 @@
   <meta charset="UTF-8" />
   <title>Quiz Buzzer – Admin</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Icon -->
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+
   <link rel="stylesheet" href="styles.css" />
 </head>
 
@@ -28,7 +31,7 @@
 
       <div id="adminStatusPill" class="status-pill status-pill--waiting">
         <span class="status-dot"></span>
-        <span id="adminStatusText">Buzzer disabled</span>
+        <span id="adminStatusText">Buzzer Disabled</span>
       </div>
     </header>
 
@@ -46,42 +49,49 @@
 
     <!-- CURRENT ROUND STATUS -->
     <section class="card-section">
-      <div class="section-title">Current Round Status</div>
+      <div class="section-title">Tactical Status</div>
       <div class="section-body">
-        <div class="meta-grid">
+
+        <div class="meta-grid status-grid">
           <div class="meta-item">
-            <div class="meta-label">Buzzer state</div>
+            <div class="meta-label">Buzzer Access</div>
             <div class="meta-value" id="buzzerStateLabel">Disabled</div>
           </div>
+
           <div class="meta-item">
-            <div class="meta-label">Winner</div>
-            <div class="meta-value" id="adminWinnerName">—</div>
+            <div class="meta-label">Winner [1st]</div>
+            <div class="meta-value" id="adminWinnerName" style="color: var(--success);">—</div>
+          </div>
+
+          <div class="meta-item">
+            <div class="meta-label">Runner-up [2nd]</div>
+            <div class="meta-value" id="adminSecondName" style="color: var(--accent);">—</div>
           </div>
         </div>
 
-        <div class="meta-grid" style="margin-top:6px;">
+        <div class="meta-grid recon-grid" style="margin-top:12px;">
           <div class="meta-item">
-            <div class="meta-label">Winner pressed at</div>
+            <div class="meta-label">Winner Timestamp</div>
             <div class="meta-value" id="adminWinnerTime">—</div>
           </div>
           <div class="meta-item">
-            <div class="meta-label">Notes</div>
-            <div class="meta-value" id="adminNotes">
-              Enable buzzer to start a round.
-            </div>
+            <div class="meta-label">Runner-Up Timestamp</div>
+            <div class="meta-value" id="adminSecondTime">—</div>
           </div>
         </div>
+
       </div>
     </section>
+
 
     <!-- SCOREBOARD -->
     <section class="card-section">
       <div class="section-title">Scoreboard</div>
       <div class="section-body">
 
+        <!-- Horizontal + Vertical scroll -->
         <div style="max-height:260px; overflow:auto; overflow-x:auto;">
           <table style="width:100%; min-width:420px; border-collapse:collapse;">
-
             <thead>
               <tr>
                 <th style="text-align:left;">Participant</th>
@@ -105,6 +115,7 @@
 
   </main>
 
+  <!-- IMPORTANT: must be module -->
   <script type="module" src="admin.js"></script>
 </body>
 
